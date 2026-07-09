@@ -5,18 +5,6 @@ Automated Business Case & Financial Model Builder
 CLI tool that takes basic financial inputs for a technology implementation
 project and generates a client-ready Excel workbook with ROI, NPV, and
 payback period calculations plus an embedded trend chart.
-
-Usage:
-    python build_business_case.py \\
-        --project-name "Warehouse IoT Rollout" \\
-        --implementation-cost 250000 \\
-        --iot-sensor-cost 75000 \\
-        --annual-savings 120000 \\
-        --discount-rate 0.08 \\
-        --years 5 \\
-        --output business_case.xlsx
-
-Run with --help for all options, or with no arguments to build a demo model.
 """
 
 import argparse
@@ -100,7 +88,7 @@ def build_workbook(args):
     wb = Workbook()
 
     # =========================================================
-    # SHEET 1: Assumptions (all hardcoded inputs live here, blue)
+    # SHEET 1: Assumptions
     # =========================================================
     ws_a = wb.active
     ws_a.title = "Assumptions"
@@ -164,7 +152,6 @@ def build_workbook(args):
         ncell.font = Font(name="Arial", size=9, italic=True, color="595959")
         ncell.border = BOX
 
-    # named single-cell references for readability in formulas
     IMPL_COST = "Assumptions!$B$6"
     IOT_COST = "Assumptions!$B$7"
     SAVINGS_Y1 = "Assumptions!$B$8"
@@ -184,7 +171,7 @@ def build_workbook(args):
     ws.sheet_view.showGridLines = False
 
     n_years = args.years
-    last_col = 1 + n_years + 1  # col A = label, then Year0..YearN
+    last_col = 1 + n_years + 1  
     ws.column_dimensions["A"].width = 30
     for c in range(2, last_col + 1):
         ws.column_dimensions[get_column_letter(c)].width = 15
@@ -193,7 +180,6 @@ def build_workbook(args):
     ws["A1"].font = TITLE_FONT
     ws.merge_cells(f"A1:{get_column_letter(last_col)}1")
 
-    # Year header row
     year_row = 3
     ws.cell(row=year_row, column=1, value="Year").font = SUBHEADER_FONT
     for y in range(0, n_years + 1):
@@ -208,7 +194,7 @@ def build_workbook(args):
     ws.cell(row=year_row, column=1).border = BOX
     ws.cell(row=year_row, column=1).alignment = CENTER
 
-    r = year_row + 1  # 4: Initial Investment
+    r = year_row + 1  
     ws.cell(row=r, column=1, value="Initial Investment ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -222,7 +208,7 @@ def build_workbook(args):
         cell.border = BOX
     INVESTMENT_ROW = r
 
-    r += 1  # 5: Annual Savings
+    r += 1  
     ws.cell(row=r, column=1, value="Annual Savings ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -239,7 +225,7 @@ def build_workbook(args):
         cell.border = BOX
     SAVINGS_ROW = r
 
-    r += 1  # 6: Maintenance Cost
+    r += 1  
     ws.cell(row=r, column=1, value="Maintenance / Support Cost ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -250,7 +236,7 @@ def build_workbook(args):
         cell.border = BOX
     MAINT_ROW = r
 
-    r += 1  # 7: Net Cash Flow
+    r += 1  
     ws.cell(row=r, column=1, value="Net Cash Flow ($)").font = SUBHEADER_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -263,7 +249,7 @@ def build_workbook(args):
         cell.border = BOX
     NET_CF_ROW = r
 
-    r += 1  # 8: Cumulative Cash Flow
+    r += 1  
     ws.cell(row=r, column=1, value="Cumulative Cash Flow ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -279,7 +265,7 @@ def build_workbook(args):
         cell.border = BOX
     CUM_CF_ROW = r
 
-    r += 1  # 9: Discount Factor
+    r += 1  
     ws.cell(row=r, column=1, value="Discount Factor").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -291,7 +277,7 @@ def build_workbook(args):
         cell.border = BOX
     DISC_ROW = r
 
-    r += 1  # 10: PV of Net Cash Flow
+    r += 1  
     ws.cell(row=r, column=1, value="PV of Net Cash Flow ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -303,7 +289,7 @@ def build_workbook(args):
         cell.border = BOX
     PV_ROW = r
 
-    r += 1  # 11: Cumulative PV
+    r += 1  
     ws.cell(row=r, column=1, value="Cumulative PV ($)").font = LABEL_FONT
     for y in range(0, n_years + 1):
         col = 2 + y
@@ -319,13 +305,11 @@ def build_workbook(args):
         cell.border = BOX
     CUM_PV_ROW = r
 
-    first_yr1_col = get_column_letter(3)          # Year 1 column
-    last_yr_col = get_column_letter(2 + n_years)   # Year N column
+    first_yr1_col = get_column_letter(3)          
+    last_yr_col = get_column_letter(2 + n_years)   
     year0_col = get_column_letter(2)
 
-    # =========================================================
-    # KPI Summary block
-    # =========================================================
+    # KPI summary block
     kpi_row = r + 3
     ws.cell(row=kpi_row, column=1, value="Key Metrics").font = HEADER_FONT
     style_header_row(ws, kpi_row, 1, min(5, last_col), HEADER_FILL, HEADER_FONT)
@@ -372,30 +356,21 @@ def build_workbook(args):
         vcell.number_format = fmt
         ws.row_dimensions[value_row].height = 26
 
-    NPV_CELL = f"{get_column_letter(1)}{value_row}"
-
-    # conditional formatting: green if NPV positive, red if negative
-    ws.conditional_formatting.add(
-        NPV_CELL,
-        CellIsRule(operator="greaterThanOrEqual", formula=["0"],
-                   font=Font(color="006100", bold=True))
-    )
-    ws.conditional_formatting.add(
-        NPV_CELL,
-        CellIsRule(operator="lessThan", formula=["0"],
-                   font=Font(color="9C0006", bold=True))
-    )
-
     # =========================================================
-    # Embedded trend chart: Net Cash Flow & Cumulative Cash Flow
+    # Embedded trend chart with forced scales
     # =========================================================
     chart = LineChart()
     chart.title = "Cash Flow Trend"
     chart.style = 2
     chart.y_axis.title = "USD ($)"
     chart.x_axis.title = "Year"
-    chart.height = 9
-    chart.width = 20
+    chart.height = 12
+    chart.width = 22
+
+    # CRITICAL FIX: Explicitly force display of axes scale labels 
+    chart.x_axis.delete = False
+    chart.y_axis.delete = False
+    chart.y_axis.numFmt = "$#,##0"  # Set scaling number formatting on the axis
 
     cats = Reference(ws, min_col=2, max_col=last_col, min_row=year_row, max_row=year_row)
 
@@ -414,12 +389,10 @@ def build_workbook(args):
 
     anchor_row = value_row + 3
     ws.add_chart(chart, f"A{anchor_row}")
-
-    # freeze panes for readability
     ws.freeze_panes = "B4"
 
     # =========================================================
-    # SHEET 3: Notes / How to use
+    # SHEET 3: Notes
     # =========================================================
     ws_n = wb.create_sheet("Notes")
     ws_n.sheet_view.showGridLines = False
@@ -427,27 +400,13 @@ def build_workbook(args):
     ws_n["A1"] = "How this model works"
     ws_n["A1"].font = TITLE_FONT
     notes = [
-        "1. All inputs live on the 'Assumptions' tab in yellow/blue cells — change any of them "
-        "and every formula in 'Financial Model' recalculates automatically.",
-        "2. Year 0 captures the one-time Implementation Cost and IoT Sensor Cost as a negative "
-        "cash outflow.",
-        "3. Annual Savings begin in Year 1 and grow each year by the Savings Growth Rate assumption "
-        "to reflect efficiency gains or scaling.",
-        "4. Annual Maintenance/Support Cost is deducted every year from Year 1 onward.",
-        "5. NPV discounts each year's Net Cash Flow back to present value using the Discount Rate "
-        "assumption (standard Excel NPV function).",
-        "6. ROI is calculated as total net cash generated over the horizon divided by the initial "
-        "investment.",
-        "7. Payback Period identifies the year (interpolated to a fraction of a year) in which "
-        "cumulative cash flow turns positive.",
-        "8. The embedded chart plots Net Cash Flow, Cumulative Cash Flow, and Cumulative PV over "
-        "the projection horizon so you can visually spot the breakeven point.",
+        "1. All inputs live on the 'Assumptions' tab in yellow/blue cells — change any of them.",
+        "2. Year 0 captures one-time implementation and hardware costs.",
+        "3. Remember to click 'Enable Editing' at the top of Excel to load values and chart dimensions."
     ]
     for i, note in enumerate(notes):
         cell = ws_n.cell(row=3 + i, column=1, value=note)
         cell.font = Font(name="Arial", size=10)
-        cell.alignment = Alignment(wrap_text=True, vertical="top")
-        ws_n.row_dimensions[3 + i].height = 30
 
     return wb
 
@@ -461,3 +420,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
