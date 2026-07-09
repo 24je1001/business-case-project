@@ -52,21 +52,22 @@ YEAR_FMT = '0'
 
 def parse_args():
     p = argparse.ArgumentParser(description="Generate an executive-ready business case Excel asset.")
-    p.add_argument("--project-name", default="Enterprise Cloud & AI Transformation",
+    # DEMO 1 DEFAULT VALUES (Warehouse IoT Project)
+    p.add_argument("--project-name", default="Warehouse IoT Automation Rollout",
                     help="Name of the investment project")
-    p.add_argument("--client-name", default="Global Enterprise Corp",
+    p.add_argument("--client-name", default="Acme Logistics Group",
                     help="Target client identifier")
-    p.add_argument("--implementation-cost", type=float, default=450000,
+    p.add_argument("--implementation-cost", type=float, default=250000,
                     help="Core platform rollout execution fees")
-    p.add_argument("--iot-sensor-cost", type=float, default=125000,
+    p.add_argument("--iot-sensor-cost", type=float, default=75000,
                     help="Edge infrastructure & equipment procurement hardware")
-    p.add_argument("--annual-savings", type=float, default=260000,
+    p.add_argument("--annual-savings", type=float, default=130000,
                     help="Gross operational yield efficiency gains (Year 1)")
-    p.add_argument("--savings-growth", type=float, default=0.04,
+    p.add_argument("--savings-growth", type=float, default=0.03,
                     help="Compounding annual yield scale optimization factor")
-    p.add_argument("--annual-maintenance", type=float, default=35000,
+    p.add_argument("--annual-maintenance", type=float, default=15000,
                     help="Sustaining software licensing & support operational overhead")
-    p.add_argument("--discount-rate", type=float, default=0.085,
+    p.add_argument("--discount-rate", type=float, default=0.08,
                     help="Corporate hurdle/wacc discount rate")
     p.add_argument("--years", type=int, default=5,
                     help="Length of the forecast structure")
@@ -362,17 +363,16 @@ def build_workbook(args):
     # =========================================================
     chart = LineChart()
     chart.title = "Investment Return Horizons & Cumulative Trajectory"
-    chart.style = 13  # High-contrast premium profile theme
+    chart.style = 13  
     chart.y_axis.title = "Valuation Streams ($)"
     chart.x_axis.title = "Valuation Increments"
     chart.height = 14
     chart.width = 24
 
-    # Explicitly configure axes visible parameters
     chart.x_axis.delete = False
     chart.y_axis.delete = False
     chart.y_axis.numFmt = "$#,##0"
-    chart.legend.position = "b"  # Move legend to the bottom area to leave chart space clear
+    chart.legend.position = "b"  
 
     cats = Reference(ws, min_col=2, max_col=last_col, min_row=year_row, max_row=year_row)
     data_net = Reference(ws, min_col=1, max_col=last_col, min_row=NET_CF_ROW, max_row=NET_CF_ROW)
@@ -384,7 +384,6 @@ def build_workbook(args):
     chart.add_data(data_cumpv, titles_from_data=True, from_rows=True)
     chart.set_categories(cats)
 
-    # Apply modern curve smoothing to trend chart vectors
     for series in chart.series:
         series.marker = Marker(symbol="circle", size=5)
         series.smooth = True
@@ -392,7 +391,7 @@ def build_workbook(args):
     anchor_row = value_row + 3
     ws.add_chart(chart, f"A{anchor_row}")
 
-    # CRITICAL INSTRUCTION: Unfreeze all viewport windows explicitly
+    # Viewport configurations
     ws.freeze_panes = None
 
     # =========================================================
